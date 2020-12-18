@@ -1,0 +1,770 @@
+Create table flags (
+	id_flag 	int 	not null 	auto_increment,
+	flag_image_url 	VARCHAR(255),
+	
+	CONSTRAINT	 FLAGS_PK 	PRIMARY KEY (id_flag)
+);
+
+Create table logos (
+	id_logo 	int 	not null 	auto_increment,
+	logo_image_url 	VARCHAR(255),
+	
+	CONSTRAINT	 LOGOS_PK 	PRIMARY KEY (id_logo)
+);
+
+
+Create table leagues (
+	id_league  		int 	not null 	auto_increment,
+	name_league 		VARCHAR(80)	 not null,
+	number_of_teams 	int,
+	is_group_stage 		boolean,
+	is_playoff 		boolean,
+	number_of_stages 	int,
+ 	is_qualification 	boolean,
+	club_or_national_team 	boolean,
+	status 			int,
+
+	CONSTRAINT	 LEAGUES_PK 	PRIMARY KEY (id_league)
+);
+
+
+Create table formation_list (
+	id_formation  		int	 not null 	auto_increment,
+	name_formation 		VARCHAR(30),
+	GK 			int,
+	CB 			int,
+	RB 			int,
+	LB 			int,
+	RWB 			int,
+	LWB 			int,
+	CDM 			int,
+	CM 			int,
+	CAM 			int,
+	RM 			int,
+	LM 			int,
+	RW 			int,
+	LW 			int,
+	RF 			int,
+	LF 			int,
+	CF 			int,
+	ST 			int,
+
+	CONSTRAINT	 FORMATION_LIST_PK 	PRIMARY KEY (id_formation)
+		
+);
+
+
+
+
+Create table teams (
+	id_team 		int	 not null auto_increment,
+	id_stadium  		int,
+	id_flag  		int,
+	id_logo  		int,
+	id_country 		int 	 not null default -1,
+	name 			VARCHAR(80) 	not null,
+	club_or_national_team 	boolean 	not null,
+	confederation 		VARCHAR(10) 	not null,
+	country_coefficient 	float(10, 3),
+	fifa_ranking_points  	int,
+	nations_league_ranking 	int,
+	club_coefficient         float(10, 3),
+	date_founded 	DATE,
+	uniform 		 VARCHAR(255),
+	fifa_entry 		int(4),
+	id_manager 		int,	
+
+	CONSTRAINT	 NATIONAL_TEAMS_PK 	PRIMARY KEY (id_team),
+
+	CONSTRAINT NATIONAL_TEAMS_FK_STADIUM
+	FOREIGN KEY (id_stadium) 
+		REFERENCES Stadiums(id_stadium)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+
+	CONSTRAINT NATIONAL_TEAMS_FK_ID_FLAG
+	FOREIGN KEY (id_flag) 
+		REFERENCES flags(id_flag)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+
+	CONSTRAINT NATIONAL_TEAMS_FK_ID_LOGO
+	FOREIGN KEY (id_logo) 
+		REFERENCES logos(id_logo)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+
+	CONSTRAINT NATIONAL_TEAMS_FK_MANAGER  
+	FOREIGN KEY(id_manager) 
+		REFERENCES managers (id_manager);
+		ON DELETE SET DEFAULT ON UPDATE CASCADE;
+);
+
+
++++ alter table teams add column uniform VARCHAR(255) after date_founded;
++++ alter table teams add column fifa_entry int(4) after uniform;
++++ alter table teams add column id_manager int default 0;
++++ alter table teams
+	add CONSTRAINT NATIONAL_TEAMS_FK_MANAGER  
+	FOREIGN KEY(id_manager) 
+		REFERENCES managers (id_manager);
+		ON DELETE SET DEFAULT ON UPDATE CASCADE;
+
+	didn't work
+		ON DELETE SET DEFAULT ON UPDATE CASCADE;
+
++ add total_market_value
++ add squad_size
+
+
+Create table stadiums (
+	id_stadium 	int 	not null 	auto_increment,
+	id_country 	int 	not null default -1,
+	id_club 	int,
+	name 	 	VARCHAR(80) 	not null,
+	stadium_image_url_1 	VARCHAR(255),
+	stadium_image_url_2 	VARCHAR(255),
+
+	capacity 	int,
+	city 		VARCHAR(50),
+
+	capacity 	int,
+	city	 	VARCHAR(50), 
+
+	CONSTRAINT	 STADIUMS_PK 	PRIMARY KEY (id_stadium),
+
+	CONSTRAINT STADIUMS_FK_COUNTRY 
+	FOREIGN KEY (id_country) 
+		REFERENCES teams(id_team),
+
+	CONSTRAINT STADIUMS_FK_CLUB
+	FOREIGN KEY (id_club) 
+		REFERENCES teams(id_team)
+);
+
+
+
+alter table stadiums 
+	add CONSTRAINT STADIUMS_FK_COUNTRY
+	FOREIGN KEY (id_country) 
+		REFERENCES teams(id_team);
+
+	didn't work
+		ON DELETE SET DEFAULT ON UPDATE CASCADE;
+	
+alter table stadiums 
+	add CONSTRAINT STADIUMS_FK_CLUB
+	FOREIGN KEY (id_club) 
+		REFERENCES teams(id_team);
+
+	didn't work
+		ON DELETE SET NULL ON UPDATE CASCADE;	
+
+
+
+
+Create table players (
+	id_player 	int 	not null auto_increment,
+	id_club	 	int,
+	id_country 	int,
+	name	  	VARCHAR(80) 	not null,
+	rating 		FLOAT(3, 3),
+	position 	int,
+	club_number 	int,
+	nat_team_number int,
+
+	photo_player 	VARCHAR(255),
+	date_of_birth 	DATE,
+	place_of_birth 	VARCHAR(80),
+	height 		int(3),
+
+	CONSTRAINT	 PLAYERS_PK 	PRIMARY KEY (id_player),
+
+	CONSTRAINT PLAYERS_FK_COUNTRY
+	FOREIGN KEY (id_country) 
+		REFERENCES teams(id_team)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+	CONSTRAINT PLAYERS_FK_CLUB
+	FOREIGN KEY (id_club) 
+		REFERENCES teams(id_team)
+		ON DELETE SET NULL ON UPDATE CASCADE
+		
+);
+
++++ alter table players add column photo_player VARCHAR(255) after nat_team_number;
++++ alter table players add column date_of_birth DATE after photo_player;
++++ alter table players add column place_of_birth VARCHAR(80) after date_of_birth;
++++ alter table players add column height int(3) after place_of_birth;
+
++ add price
+
+
+
+create table managers (
+	id_manager 			int 	not null auto_increment,
+	id_team 			int,
+	name	  			VARCHAR(80) 	not null,
+	photo_manager 			VARCHAR(255),
+	date_of_birth 			DATE,
+	place_of_birth 			VARCHAR(80),
+	id_country_place_of_birth 	int,
+	
+	CONSTRAINT	 MANAGERS_PK 	PRIMARY KEY (id_manager),
+	CONSTRAINT MANAGERS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET NULL ON UPDATE CASCADE,
+
+	CONSTRAINT MANAGERS_FK_COUNTRY
+	FOREIGN KEY (id_country_place_of_birth) 
+		REFERENCES teams(id_team)
+		ON DELETE SET NULL ON UPDATE CASCADE
+	
+);
+
+Create table stages (
+	id_league  		int 		not null,
+	number_stage 		tinyint 	not null,
+
+	number_previous_stage  	tinyint,
+	number_next_stage  	tinyint,
+	number_of_groups 	tinyint,
+	playoff_or_group_stage 	boolean,
+	number_of_teams 	smallint,
+	is_advancing 		boolean,
+	is_qualifying 		boolean,
+	id_next_league 		int,
+	home_and_away 		boolean,
+	status 			tinyint,
+
+	
+	CONSTRAINT	 STAGES_PK 	PRIMARY KEY (id_league, number_stage),
+
+	CONSTRAINT STAGES_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON DELETE CASCADE ON UPDATE CASCADE
+	
+);
+
+
+
+Create table playoff_rounds (
+	id_league 		int 		not null,
+	number_stage	 	tinyint 	not null,
+
+	name_round 		VARCHAR(40),
+	number_of_pairs 	tinyint,	
+	status 			tinyint,
+
+	CONSTRAINT	 PLAYOFF_ROUNDS_PK 	PRIMARY KEY (id_league, number_stage),
+
+	CONSTRAINT PLAYOFF_ROUNDS_FK_LEAGUE_NUMBER_STAGE 
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+		
+
+Create table round_pairs (
+	id_league 		int 	not null default -1,
+	number_stage 		tinyint 	not null default -1,
+	id_team_1 		int 	not null default -1,
+	id_team_2 		int 	not null default -1,
+
+	id_next_team 		int,
+	aggregate_team_1 	tinyint,
+	aggregate_team_2 	tinyint,
+	winner_team_id 		int,
+	loser_team_id  		int,	
+
+	CONSTRAINT	 ROUND_PAIRS_PK 	PRIMARY KEY (id_league, number_stage, 
+					id_team_1, id_team_2),
+
+	CONSTRAINT ROUND_PAIRS_FK_NUMBER_STAGE_NUMBER_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage),
+
+	CONSTRAINT ROUND_PAIRS_FK_TEAM_1
+	FOREIGN KEY (id_team_1) 
+		REFERENCES teams(id_team),
+		
+
+	CONSTRAINT ROUND_PAIRS_FK_TEAM_2
+	FOREIGN KEY (id_team_2) 
+		REFERENCES teams(id_team)
+);
+
+does not work
+	ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+
+
+
++ create a stadium with id 1 that will be the id
+
+Create table fixtures (
+	id_league  		int 	not null default -1,
+	id_team_1 	int 	not null default -1,
+	id_team_2 	int  	not null default -1,
+	number_stage 	tinyint 	not null default -1,
+	meeting_number  int  	not null default -1,
+	match_date_time 	DATETIME,
+
+	id_stadium 	int 	not null default 1,	
+	two_legged 	boolean,
+
+	CONSTRAINT	 FIXTURES_PK 	PRIMARY KEY (id_league, id_team_1, id_team_2,
+					 number_stage, meeting_number),
+
+	CONSTRAINT FIXTURES_FK_NUMBER_LEAUGE_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage),
+
+
+	CONSTRAINT FIXTURES_FK_TEAM_1
+	FOREIGN KEY (id_team_1) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT FIXTURES_FK_TEAM_2
+	FOREIGN KEY (id_team_2) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CONSTRAINT FIXTURES_FK_STADIUM
+	FOREIGN KEY (id_stadium) 
+		REFERENCES stadiums(id_stadium)
+
+
+);
+
+didn't work
+	ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+
+
+
+Create table results (
+	id_league  		int 	not null,
+	id_team_1 		int  	not null,
+	id_team_2 		int  	not null,
+	number_stage 		tinyint 	not null,
+	meeting_number  	int  	not null,
+	team_1_id_formation 	int 	not null default 1,
+	team_2_id_formation 	int 	not null default 1,
+	id_stadium 		int 	not null default 1,
+	
+	matchday 		int,
+	match_date 		DATETIME, 
+	goals_1 	 	tinyint,
+	goals_2 		tinyint,
+	possession_1 		tinyint,
+	possession_2 		tinyint,
+	shots_1 		tinyint,
+	shots_2	 		tinyint,
+	shots_on_target_1 	tinyint,
+	shots_on_target_2 	tinyint,
+	corners_1  		tinyint,
+	corners_2 		tinyint,
+	passes_1 		smallint,
+	passes_2 		smallint,
+	pass_accuracy_1	 	tinyint,
+	pass_accuracy_2 	tinyint,
+	fouls_1		 	tinyint,
+	fould_2 		tinyint,
+	yellow_cards_1	 	tinyint,
+	yellow_cards_2	 	tinyint,
+	red_cards_1	 	tinyint,
+	red_cards_2 		tinyint,
+	offsides_1 		tinyint,
+	offsides_2	 	tinyint,
+	home_away 		boolean,
+	two_legged 		boolean,
+	aggregate_1 		tinyint,
+	aggregate_2 		tinyint,
+	leg_number 		tinyint,
+	id_team_advancing 	int,
+
+	CONSTRAINT	 RESULTS_PK 	PRIMARY KEY (id_league, id_team_1, id_team_2, 
+						number_stage, meeting_number),
+
+	CONSTRAINT RESULTS_FK_LEAGUE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT RESULTS_FK_TEAM_1
+	FOREIGN KEY (id_team_1) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT RESULTS_FK_TEAM_2
+	FOREIGN KEY (id_team_2) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_FK_FORMATION_LIST_1
+	FOREIGN KEY (team_1_id_formation) 
+		REFERENCES formation_list(id_formation),
+
+	CONSTRAINT RESULTS_FK_FORMATION_LIST_2
+	FOREIGN KEY (team_2_id_formation) 
+		REFERENCES formation_list(id_formation),	
+
+	CONSTRAINT RESULTS_FK_STADIUM
+	FOREIGN KEY (id_stadium) 
+		REFERENCES stadiums(id_stadium)
+			
+	
+	
+);
+
+didn't work
+	ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+
+
+
+id_league = -1 represents FRIENDLY MATCHES
+number_stage = -1 and meeting_number = -1 is for FRIENDLY MATCHES
+id_team = -1 means the player has no team
+id_player = -1 is the default player
+number_group = -1 is a dummy value for default
+number_stage = -1 is a dummy value for default
+
+Create table lineups (
+	id_league 		int 	not null default -1,
+	id_team 		int 	not null default -1,
+	number_stage 		tinyint 	not null default -1,
+	meeting_number 		int 	not null default -1,
+	id_player 		int 	not null default -1,
+
+	is_in_starting_lineup 	boolean,
+ 	position 		tinyint,
+	was_substituted 	boolean,
+	sub_off_for_id_player 	int,
+
+
+	CONSTRAINT	 LINEUPS_PK 	PRIMARY KEY (id_league, id_team, number_stage, 
+					meeting_number, id_player),
+
+	CONSTRAINT LINEUPS_FK_NUMBER_LEAGUE_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT LINEUPS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT LINEUPS_FK_NUMBER_STAGE
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON UPDATE CASCADE
+);
+
+
+didn't work:
+	CONSTRAINT LINEUPS_FK_NUMBER_LEAGUE_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT LINEUPS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+
+	CONSTRAINT LINEUPS_FK_NUMBER_STAGE
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE
+
+
+
+
+
+
+
+
+Create table player_stats (
+	id_league 		int 	not null default -1,
+	id_player 		int 	not null,
+	id_team 		int 	not null  default -1,
+
+	goals 			smallint,
+	assists 		smallint,
+	clean_sheets	 	smallint,
+	yellow_cards 		smallint,
+	red_cards 		smallint,
+
+	CONSTRAINT	 PLAYER_STATS_PK 	PRIMARY KEY (id_league, id_team, id_player),
+
+	
+	CONSTRAINT PLAYER_STATS_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT PLAYER_STATS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON UPDATE CASCADE,
+
+
+	CONSTRAINT PLAYER_STATS_FK_NUMBER_STAGE
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+didn't work
+	
+	CONSTRAINT PLAYER_STATS_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT PLAYER_STATS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+
+	CONSTRAINT PLAYER_STATS_FK_NUMBER_STAGE
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON DELETE CASCADE ON UPDATE CASCADE
+
+
+
+
+
+Create table results_per_player (
+	id_league 		int 	not null default -1,
+	id_team 		int 	not null default -1,
+	number_stage 		tinyint 	not null default -1,
+	meeting_number 		int 	not null default -1,
+	id_player 		int 	not null default -1,
+
+	goals 			smallint,
+	assists 		smallint,
+	clean_sheets 		smallint,
+	yellow_cards 		smallint,
+	red_cards 		smallint,	
+
+	CONSTRAINT	 RESULTS_PER_PLAYER_PK 	PRIMARY KEY (id_league, id_team, number_stage, 
+					meeting_number, id_player),
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_NUMBER_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_PLAYER
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON UPDATE CASCADE
+);
+
+didn't work
+	CONSTRAINT RESULTS_PER_PLAYER_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_NUMBER_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT RESULTS_PER_PLAYER_FK_PLAYER
+	FOREIGN KEY (id_player) 
+		REFERENCES players(id_player)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE
+
+
+Create table teams_stats (
+	id_league 		int 	not null default -1,
+	id_team 		int 	not null default -1,
+
+	goals 			int,
+	assists 		int,
+	clean_sheets	 	int,
+	yellow_cards 		int,
+	red_cards 		int,
+
+	CONSTRAINT	 TEAMS_STATS_PK 	PRIMARY KEY (id_league, id_team),
+
+	CONSTRAINT TEAMS_STATS_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT TEAMS_STATS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+didn't work
+	CONSTRAINT TEAMS_STATS_FK_LEAGUE
+	FOREIGN KEY (id_league) 
+		REFERENCES leagues(id_league)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT TEAMS_STATS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+
+
+
+
+
+
+
+Create table groups_ (
+	id_league 		int  		not null,
+	number_stage 	 	tinyint  	not null,
+	number_group   		tinyint  	not null,
+
+	name_group 		VARCHAR(15),
+	number_of_teams 	tinyint,
+	top_number_advancing 	tinyint,	
+	status 			tinyint,
+		
+	CONSTRAINT	 GROUPS_PK 	PRIMARY KEY (id_league, number_stage, number_group),
+
+	CONSTRAINT GROUPS_FK_LEAGUE_NUMBER_STAGE
+	FOREIGN KEY (id_league, number_stage) 
+		REFERENCES stages (id_league, number_stage)
+		ON DELETE CASCADE ON UPDATE CASCADE	
+);
+
+
+
+
+Create table standings (
+	id_league 		int 	not null default -1,
+	id_team 		int 	not null default -1,
+	number_stage 		tinyint 	not null default -1,
+	number_group 		tinyint 	not null default -1,
+
+	id_next_team 		int,
+	Position 		tinyint,
+	Played 			tinyint,
+	Won 			tinyint,
+	Lost 			tinyint,
+	GF 			smallint,
+	GA 			smallint,
+	GD 			smallint,
+	Points 			tinyint,		
+
+	CONSTRAINT	 STANDINGS_PK 	PRIMARY KEY (id_league, id_team, number_stage, 
+					number_group),
+
+
+	CONSTRAINT STANDINGS_FK_NUMBER_LEAGUE_STAGE_GROUP
+	FOREIGN KEY (id_league, number_stage, number_group) 
+		REFERENCES groups_(id_league, number_stage, number_group)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT STANDINGS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON UPDATE CASCADE,
+
+	CONSTRAINT STANDINGS_FK_NEXT_TEAM
+	FOREIGN KEY (id_next_team) 
+		REFERENCES teams(id_team)
+		ON UPDATE CASCADE
+
+	
+);
+
+didn't work
+	CONSTRAINT STANDINGS_FK_NUMBER_LEAGUE_STAGE
+	FOREIGN KEY (number_stage) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT STANDINGS_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT STANDINGS_FK_TEAM
+	FOREIGN KEY (id_next_team) 
+		REFERENCES teams(id_team)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE,
+
+	CONSTRAINT STANDINGS_FK_NUMBER_STAGE
+	FOREIGN KEY (number_group) 
+		REFERENCES groups(number_group)
+		ON DELETE SET DEFAULT ON UPDATE CASCADE
+
+
+
+
+Create table team_stage_advancing (
+	id_team 				int 	not null,
+	id_league 				int 	not null,
+	number_stage_advancing_to	 	tinyint 	not null,
+
+	status 			tinyint,
+
+	
+	CONSTRAINT	 TEAM_STAGE_ADVANCING_PK
+			  	PRIMARY KEY (id_league, id_team, number_stage_advancing_to),	
+
+	CONSTRAINT TEAM_STAGE_ADVANCING_FK_LEAGUE
+	FOREIGN KEY (id_league, number_stage_advancing_to) 
+		REFERENCES stages(id_league, number_stage)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CONSTRAINT TEAM_STAGE_ADVANCING_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+Create table team_league_qualification (
+	id_team 				int 	not null,
+	id_league_qualifying_to  		int 	not null,
+
+	status 			tinyint,
+
+	CONSTRAINT	 TEAM_LEAGUE_QUALIFICATION_PK
+			  	PRIMARY KEY (id_team, id_league_qualifying_to),	
+	
+	CONSTRAINT TEAM_LEAGUE_QUALIFICATION_FK_TEAM
+	FOREIGN KEY (id_team) 
+		REFERENCES teams(id_team)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+
+	CONSTRAINT TEAM_LEAGUE_QUALIFICATION_FK_LEAGUE
+	FOREIGN KEY (id_league_qualifying_to) 
+		REFERENCES leagues(id_league)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+*************************************************************************************************
+
